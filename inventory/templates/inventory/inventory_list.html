@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Inventory list</title>
+
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+	<!-- Bootstrap JavaScript Bundle with Popper -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+</head>
+<body>
+	<div class="container">
+		<input id="name-input" type="text" class="form-control mb-3 mt-3" placeholder="Search by name and press enter" aria-label="Search by name">
+		<table id="inventory-table" class="table">
+			<thead class="table-dark">
+				<tr>
+					<th>No.</th>
+					<th>Name</th>
+					<th>Supplier</th>
+					<th>Availability</th>
+				</tr>
+			</thead>
+			<tbody>
+			</tbody>
+		</table>
+	</div>
+</body>
+
+<script>
+	// Function to clear the table contents
+	function clearTable(){
+		var table = document.getElementById('inventory-table');
+		var tbody = table.getElementsByTagName('tbody')[0];
+		tbody.innerHTML = '';
+	}
+</script>
+
+<script>
+	// Function to fill in the tables with data
+	function fillTableWithData(data){
+		clearTable();  // Clear the table contents first
+		var table = document.getElementById('inventory-table');
+		var tbody = table.getElementsByTagName('tbody')[0];
+
+		for (var i=0; i<data.length; ++i){
+			var newRow = tbody.insertRow();
+			var newCell1 = newRow.insertCell();
+			newCell1.innerHTML = i+1;
+			var newCell2 = newRow.insertCell();
+			newCell2.innerHTML = '<a href="/inventory/'+data[i].id+'">'+data[i].name+'</a>';
+			var newCell3 = newRow.insertCell();
+			newCell3.innerHTML = data[i].supplier;
+			var newCell4 = newRow.insertCell();
+			if (data[i].availability)
+				newCell4.innerHTML = 'Yes';
+			else
+				newCell4.innerHTML = 'No';
+		}
+	}
+</script>
+
+<script>
+	// Function to make a request to the API endpoint to fetch the data
+	function fetchData(name){
+		var request = new XMLHttpRequest();
+		request.onreadystatechange = function(){
+			if (request.status == 200){
+				var data = JSON.parse(request.responseText);
+				fillTableWithData(data);
+			}
+		}
+		request.open("GET", "{% url 'inventory_list_api' %}?name="+name);
+		request.send();
+	}
+</script>
+
+<script>
+	document.addEventListener("DOMContentLoaded", function(event) { 
+  		// Fetch all the data
+  		fetchData('');
+	});
+</script>
+
+<script>
+	// Script to handle input's on-enter
+	var input = document.getElementById('name-input');
+	input.addEventListener('keypress', function(e){
+		if (e.key === 'Enter'){
+			fetchData(input.value);
+		}
+	})
+</script>
+</html>
